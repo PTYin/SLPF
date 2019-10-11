@@ -8,29 +8,35 @@
 #include "toolkit.hpp"
 #include <vector>
 #include <map>
-#include <GL/freeglut.h>
+#include <GL/glut.h>
 #include <AVLTree.hpp>
 
 
 //--------------------------------------------------------------
 // Step
 void initEdgeTable();
+
 void scanLineFill();
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
 // Draw
 void drawPoints();
+
 void drawEdges();
+
 void fill(double left_f, double right_f, int y);
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
 // GL Action
 void renderScene();
+
 void mouse(int button, int state, int mx, int my);
+
 void keyboard(unsigned char key, int x, int y);
-void process(int argc, char** argv);
+
+void process(int argc, char **argv);
 //--------------------------------------------------------------
 
 #endif //SLPF_CORE_H

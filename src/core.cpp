@@ -22,57 +22,56 @@ int current = 0;
 int bottom = 0x7fffffff, top = 0;
 //--------------------------------------------------------------
 
-std::vector<Point>                  points;
-std::vector<Edge>                   edges;
-std::map<int, std::vector<Edge> *>  edgeMap;
-
+std::vector<Point> points;
+std::vector<Edge> edges;
+std::map<int, std::vector<Edge> *> edgeMap;
 
 
 //--------------------------------------------------------------
 // Step
 void initEdgeTable()
 {
-    if(points.size() < 3)
+    if (points.size() < 3)
         return;
-    for(int i = 1; i < points.size(); i++)
+    for (int i = 1; i < points.size(); i++)
     {
-        bottom = bottom > points[i-1].y ? points[i-1].y : bottom;
-        top = top < points[i-1].y ? points[i-1].y : top;
-        auto yMin = min(points[i-1].y, points[i].y);
+        bottom = bottom > points[i - 1].y ? points[i - 1].y : bottom;
+        top = top < points[i - 1].y ? points[i - 1].y : top;
+        auto yMin = min(points[i - 1].y, points[i].y);
 
-        if(points[i-1].x == points[i].x)  // if line parallel with x axis
+        if (points[i - 1].y == points[i].y)  // if line parallel with x axis
             continue;
-        edges.emplace_back(points[i-1].x, points[i-1].y, points[i].x, points[i].y);
+        edges.emplace_back(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y);
 
 
-        if(edgeMap.count(yMin))
+        if (edgeMap.count(yMin))
         {
-            edgeMap[yMin]->push_back(edges[edges.size()-1]);
+            edgeMap[yMin]->push_back(edges[edges.size() - 1]);
         }
         else
         {
             auto vec = new std::vector<Edge>;
-            vec->push_back(edges[edges.size()-1]);
+            vec->push_back(edges[edges.size() - 1]);
             edgeMap[yMin] = vec;
         }
 
     }
 
-    bottom = bottom > points[points.size()-1].y ? points[points.size()-1].y : bottom;
-    top = top < points[points.size()-1].y ? points[points.size()-1].y : top;
+    bottom = bottom > points[points.size() - 1].y ? points[points.size() - 1].y : bottom;
+    top = top < points[points.size() - 1].y ? points[points.size() - 1].y : top;
     // last edge
-    edges.emplace_back(points[points.size()-1].x, points[points.size()-1].y, points[0].x, points[0].y);
+    edges.emplace_back(points[points.size() - 1].x, points[points.size() - 1].y, points[0].x, points[0].y);
 
-    auto yMin = min(points[points.size()-1].y, points[0].y);
+    auto yMin = min(points[points.size() - 1].y, points[0].y);
 
-    if(edgeMap.count(yMin))
+    if (edgeMap.count(yMin))
     {
-        edgeMap[yMin]->push_back(edges[edges.size()-1]);
+        edgeMap[yMin]->push_back(edges[edges.size() - 1]);
     }
     else
     {
         auto vec = new std::vector<Edge>;
-        vec->push_back(edges[edges.size()-1]);
+        vec->push_back(edges[edges.size() - 1]);
         edgeMap[yMin] = vec;
     }
 }
@@ -81,49 +80,53 @@ void scanLineFill()
 {
 
     pty::AVLTree<Edge> activeEdgeTable;
-    for(int line = bottom; line <= top; line++)
+    for (int line = bottom; line <= top; line++)
     {
-        if(edgeMap.count(line))
-            for(Edge edge : *edgeMap[line])
+        if (edgeMap.count(line))
+            for (Edge edge : *edgeMap[line])
             {
                 activeEdgeTable.insert(edge);
             }
         bool ableToDraw = false;
         std::vector<Edge> toRemove;
-        Edge* last_ptr = nullptr;
+        Edge *last_ptr = nullptr;
         activeEdgeTable.traversal_in([&toRemove, &line, &ableToDraw, &last_ptr](pty::AVLTreeNode<Edge> *node)
-        {
-            if(ableToDraw)
-            {
-                fill(last_ptr->xOfyMin-last_ptr->slopeInverse, node->get().xOfyMin, line);
-                ableToDraw = false;
-            }
-            else
-            {
-                ableToDraw = true;
-            }
+                                     {
+                                         if (ableToDraw)
+                                         {
+                                             fill(last_ptr->xOfyMin - last_ptr->slopeInverse, node->get().xOfyMin,
+                                                  line);
+                                             ableToDraw = false;
+                                         }
+                                         else
+                                         {
+                                             ableToDraw = true;
+                                         }
 
-            /*
-             * Precision loss can cause Balanced SearchTree's structure fault.
-             * Therefore, after modifying one node's xOfyMin, it should still follow the origin order in the tree.*/
-            if(last_ptr)
-            {
-                node->get().xOfyMin = (last_ptr->xOfyMin < node->get().xOfyMin + node->get().slopeInverse ?
-                        node->get().xOfyMin + node->get().slopeInverse : last_ptr->xOfyMin + INFINITESIMAL);  // solve Precision problem
-            }
-            else
-            {
-                node->get().xOfyMin +=  node->get().slopeInverse;
-            }
+                                         /*
+                                          * Precision loss can cause Balanced SearchTree's structure fault.
+                                          * Therefore, after modifying one node's xOfyMin, it should still follow the origin order in the tree.*/
+                                         if (last_ptr)
+                                         {
+                                             node->get().xOfyMin = (last_ptr->xOfyMin <
+                                                                    node->get().xOfyMin + node->get().slopeInverse ?
+                                                                    node->get().xOfyMin + node->get().slopeInverse :
+                                                                    last_ptr->xOfyMin +
+                                                                    INFINITESIMAL);  // solve Precision problem
+                                         }
+                                         else
+                                         {
+                                             node->get().xOfyMin += node->get().slopeInverse;
+                                         }
 
-            last_ptr = &node->get();
+                                         last_ptr = &node->get();
 
-            if(line+1 == node->get().yMax)
-            {
-                toRemove.push_back(node->get());
-            }
-        });
-        for(auto edge:toRemove)
+                                         if (line + 1 == node->get().yMax)
+                                         {
+                                             toRemove.push_back(node->get());
+                                         }
+                                     });
+        for (auto edge:toRemove)
         {
             activeEdgeTable.remove(edge);
         }
@@ -138,9 +141,9 @@ void drawPoints()
 {
     glPointSize(3.0f);
     glBegin(GL_POINTS);
-    for(auto point : points)
+    for (auto point : points)
     {
-        glColor3f(1.f,0.f,0.f);
+        glColor3f(1.f, 0.f, 0.f);
         glVertex2i(point.x, point.y);
     }
     glEnd();
@@ -148,28 +151,28 @@ void drawPoints()
 
 void drawEdges()
 {
-    glColor3d(0,255,0);
+    glColor3d(1, 1, 1);
     glBegin(GL_LINE_STRIP);
     int points_size = points.size();
-    for(unsigned i = 0;i<points_size-1;i++)
+    for (unsigned i = 0; i < points_size - 1; i++)
     {
-        glVertex2i(points[i].x,points[i].y);
-        glVertex2i(points[i+1].x,points[i+1].y);
+        glVertex2i(points[i].x, points[i].y);
+        glVertex2i(points[i + 1].x, points[i + 1].y);
     }
-    if(close)
+    if (close)
     {
-        glVertex2i(points[points_size-1].x,points[points_size-1].y);
-        glVertex2i(points[0].x,points[0].y);
+        glVertex2i(points[points_size - 1].x, points[points_size - 1].y);
+        glVertex2i(points[0].x, points[0].y);
     }
     glEnd();
 }
 
 void fill(double left_f, double right_f, int y)
 {
-    int left = (int)left_f, right = (int)right_f;
-    if(left == 0)
+    int left = (int) left_f, right = (int) right_f;
+    if (left == 0)
     {
-        std::cout<<" ";
+        std::cout << " ";
     }
     glBegin(GL_LINES);
     glVertex2i(left, y);
@@ -183,18 +186,18 @@ void fill(double left_f, double right_f, int y)
 // GL Action
 void renderScene()
 {
-    glClearColor(0.f,0.f,0.f,0.f);
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if(!clear)
+    if (!clear)
     {
-        if(!close)
+        if (!close)
         {
             drawPoints();
-            if(current >= 2)
+            if (current >= 2)
                 drawEdges();
         }
-        else if(current >= 2)
+        else if (current >= 2)
         {
             drawEdges();
             initEdgeTable();
@@ -205,9 +208,10 @@ void renderScene()
 
     glFlush();
 }
+
 void mouse(int button, int state, int mx, int my)
 {
-    if(state == GLUT_DOWN)
+    if (state == GLUT_DOWN)
     {
         switch (button)
         {
@@ -233,7 +237,7 @@ void mouse(int button, int state, int mx, int my)
 
 void keyboard(unsigned char key, int x, int y)
 {
-    if(key == ' ')
+    if (key == ' ')
     {
         glFlush();
 
@@ -242,7 +246,7 @@ void keyboard(unsigned char key, int x, int y)
         points.clear();
         edges.clear();
         //TODO
-        for(auto pair:edgeMap)
+        for (auto pair:edgeMap)
         {
             delete pair.second;
         }
@@ -252,7 +256,7 @@ void keyboard(unsigned char key, int x, int y)
     }
 }
 
-void process(int argc, char** argv)
+void process(int argc, char **argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
