@@ -74,10 +74,6 @@ namespace pty
                 value(_value), father(_father), left_child(_left_child), right_child(_right_child)
         {}
 
-    public:
-        T get() const
-        { return value; }
-
         PrimitiveNode *&left()
         {
             return (decltype(this) &) left_child;
@@ -92,6 +88,10 @@ namespace pty
         {
             return (decltype(this) &) father;
         }
+
+    public:
+        T get() const
+        { return value; }
 
         bool operator<(const Node &other) const
         { return value < other.value; }
@@ -246,7 +246,6 @@ namespace pty
                                                                               _right_child), height(1)
         {}
 
-    public:
         AVLTreeNode *&left()
         {
             return (decltype(this) &) this->left_child;
@@ -261,6 +260,8 @@ namespace pty
         {
             return (decltype(this) &) this->father;
         }
+
+    public:
 
         T& get()
         {
@@ -308,7 +309,7 @@ namespace pty
 
         friend class SearchTree<T, Node>;
 
-        friend class Treap<T, Node>; // TODO
+        friend class Treap<T, Node>;
 
     protected:
         int key;
@@ -332,7 +333,11 @@ namespace pty
             return (decltype(this) &) this->father;
         }
 
-        using PrimitiveNode<T>::get;
+    public:
+        T& get()
+        {
+            return this->value;
+        }
 
         // 以该节点为根节点进行遍历（前序、中序、后序）
         template<typename F>

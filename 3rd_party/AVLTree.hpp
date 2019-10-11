@@ -63,6 +63,8 @@ namespace pty
         // 根据情况进行调整
         Node *rotateAt(Node *node)
         {
+            if(!node)
+                return this->root;
             Node *fa = node->fa();
             Node *pa = fa->fa();
             if (IS_LCHILD(fa))

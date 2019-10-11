@@ -10,6 +10,7 @@
 #include <map>
 #include <GL/glut.h>
 #include <AVLTree.hpp>
+#include <Treap.hpp>
 
 
 //--------------------------------------------------------------

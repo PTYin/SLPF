@@ -79,7 +79,7 @@ void initEdgeTable()
 void scanLineFill()
 {
 
-    pty::AVLTree<Edge> activeEdgeTable;
+    pty::Treap<Edge> activeEdgeTable;
     for (int line = bottom; line <= top; line++)
     {
         if (edgeMap.count(line))
@@ -90,7 +90,7 @@ void scanLineFill()
         bool ableToDraw = false;
         std::vector<Edge> toRemove;
         Edge *last_ptr = nullptr;
-        activeEdgeTable.traversal_in([&toRemove, &line, &ableToDraw, &last_ptr](pty::AVLTreeNode<Edge> *node)
+        activeEdgeTable.traversal_in([&toRemove, &line, &ableToDraw, &last_ptr](pty::TreapNode<Edge> *node)
                                      {
                                          if (ableToDraw)
                                          {
