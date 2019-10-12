@@ -3,6 +3,7 @@
 **Implementation of SLPF, Using OpenGL, Practice of Balanced Tree**
 
 ![](demo.png)
+![](demo2.png)
 
 ## Explanation
 
